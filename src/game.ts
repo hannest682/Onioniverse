@@ -57,9 +57,13 @@ export class Game {
   }
 
   render() {
+    const cameraX = this.player.x - this.canvas.width / 2;
+    const cameraY = this.player.y - this.canvas.height / 2;
+
     this.renderer.clear();
-    this.renderer.drawPlayer(this.player);
-    this.onions.forEach(onion => this.renderer.drawOnion(onion));
+    this.renderer.drawBackground(cameraX, cameraY);
+    this.renderer.drawPlayer();
+    this.onions.forEach(onion => this.renderer.drawOnion(onion, cameraX, cameraY));
     this.renderer.drawScore(this.score);
   }
 

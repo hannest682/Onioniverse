@@ -1,7 +1,7 @@
 export class Player {
   x: number;
   y: number;
-  speed: number = 5;
+  speed: number = 4;
 
   constructor(x: number, y: number) {
     this.x = x;
