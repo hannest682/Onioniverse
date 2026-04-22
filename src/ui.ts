@@ -5,6 +5,7 @@ export class Renderer {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   background: HTMLImageElement;
+  playerImage: HTMLImageElement;
   backgroundZoom = 1.25;
 
   constructor(canvas: HTMLCanvasElement, onBackgroundLoaded?: (width: number, height: number) => void) {
@@ -15,6 +16,9 @@ export class Renderer {
       onBackgroundLoaded?.(this.background.naturalWidth, this.background.naturalHeight);
     };
     this.background.src = '/map_less_contrast.png';
+
+    this.playerImage = new Image();
+    this.playerImage.src = '/player_filled.png';
   }
 
   clear() {
@@ -45,8 +49,22 @@ export class Renderer {
   drawPlayer(player: Player, cameraX: number, cameraY: number) {
     const drawX = (player.x - cameraX) * this.backgroundZoom;
     const drawY = (player.y - cameraY) * this.backgroundZoom;
-    this.ctx.fillStyle = 'blue';
-    this.ctx.fillRect(drawX - 10, drawY - 10, 20, 20);
+    const iconSize = 50;
+    const wobble = player.moving ? Math.sin(performance.now() / 100) * 3 : 0;
+    const tilt = player.moving ? Math.sin(performance.now() / 120) * 0.08 : 0;
+
+    this.ctx.save();
+    this.ctx.translate(drawX, drawY + wobble);
+    this.ctx.rotate(tilt);
+
+    if (this.playerImage.complete && this.playerImage.naturalWidth > 0) {
+      this.ctx.drawImage(this.playerImage, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+    } else {
+      this.ctx.fillStyle = 'blue';
+      this.ctx.fillRect(-10, -10, 20, 20);
+    }
+
+    this.ctx.restore();
   }
 
   drawOnion(onion: Onion, cameraX: number, cameraY: number) {

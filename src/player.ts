@@ -1,7 +1,8 @@
 export class Player {
   x: number;
   y: number;
-  speed: number = 4;
+  speed: number = 3;
+  moving: boolean = false;
 
   constructor(x: number, y: number) {
     this.x = x;
@@ -9,9 +10,23 @@ export class Player {
   }
 
   update(keys: Set<string>) {
-    if (keys.has('ArrowUp')) this.y -= this.speed;
-    if (keys.has('ArrowDown')) this.y += this.speed;
-    if (keys.has('ArrowLeft')) this.x -= this.speed;
-    if (keys.has('ArrowRight')) this.x += this.speed;
+    this.moving = false;
+
+    if (keys.has('ArrowUp')) {
+      this.y -= this.speed;
+      this.moving = true;
+    }
+    if (keys.has('ArrowDown')) {
+      this.y += this.speed;
+      this.moving = true;
+    }
+    if (keys.has('ArrowLeft')) {
+      this.x -= this.speed;
+      this.moving = true;
+    }
+    if (keys.has('ArrowRight')) {
+      this.x += this.speed;
+      this.moving = true;
+    }
   }
 }
