@@ -5,12 +5,15 @@ export class Renderer {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
   background: HTMLImageElement;
-  backgroundZoom = 3;
+  backgroundZoom = 1.25;
 
-  constructor(canvas: HTMLCanvasElement) {
+  constructor(canvas: HTMLCanvasElement, onBackgroundLoaded?: (width: number, height: number) => void) {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d')!;
     this.background = new Image();
+    this.background.onload = () => {
+      onBackgroundLoaded?.(this.background.naturalWidth, this.background.naturalHeight);
+    };
     this.background.src = '/map_less_contrast.png';
   }
 
@@ -18,30 +21,40 @@ export class Renderer {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  drawBackground(playerX: number, playerY: number) {
+  getCamera(playerX: number, playerY: number, worldWidth: number, worldHeight: number) {
+    const viewWidth = this.canvas.width / this.backgroundZoom;
+    const viewHeight = this.canvas.height / this.backgroundZoom;
+    const cameraX = Math.max(0, Math.min(worldWidth - viewWidth, playerX - viewWidth / 2));
+    const cameraY = Math.max(0, Math.min(worldHeight - viewHeight, playerY - viewHeight / 2));
+    return { x: cameraX, y: cameraY };
+  }
+
+  drawBackground(cameraX: number, cameraY: number) {
     if (!this.background.complete) {
       return;
     }
 
-    const bgWidth = this.canvas.width * this.backgroundZoom;
-    const bgHeight = this.canvas.height * this.backgroundZoom;
-    const maxOffsetX = bgWidth - this.canvas.width;
-    const maxOffsetY = bgHeight - this.canvas.height;
-    const offsetX = -Math.max(0, Math.min(maxOffsetX, (playerX / this.canvas.width) * maxOffsetX));
-    const offsetY = -Math.max(0, Math.min(maxOffsetY, (playerY / this.canvas.height) * maxOffsetY));
+    const bgWidth = this.background.naturalWidth * this.backgroundZoom;
+    const bgHeight = this.background.naturalHeight * this.backgroundZoom;
+    const drawX = -cameraX * this.backgroundZoom;
+    const drawY = -cameraY * this.backgroundZoom;
 
-    this.ctx.drawImage(this.background, offsetX, offsetY, bgWidth, bgHeight);
+    this.ctx.drawImage(this.background, drawX, drawY, bgWidth, bgHeight);
   }
 
-  drawPlayer(player: Player) {
+  drawPlayer(player: Player, cameraX: number, cameraY: number) {
+    const drawX = (player.x - cameraX) * this.backgroundZoom;
+    const drawY = (player.y - cameraY) * this.backgroundZoom;
     this.ctx.fillStyle = 'blue';
-    this.ctx.fillRect(player.x - 10, player.y - 10, 20, 20);
+    this.ctx.fillRect(drawX - 10, drawY - 10, 20, 20);
   }
 
-  drawOnion(onion: Onion) {
+  drawOnion(onion: Onion, cameraX: number, cameraY: number) {
     if (!onion.collected) {
+      const drawX = (onion.x - cameraX) * this.backgroundZoom;
+      const drawY = (onion.y - cameraY) * this.backgroundZoom;
       this.ctx.fillStyle = 'yellow';
-      this.ctx.fillRect(onion.x - 5, onion.y - 5, 10, 10);
+      this.ctx.fillRect(drawX - 5, drawY - 5, 10, 10);
     }
   }
 

@@ -16,10 +16,17 @@ export class Game {
     this.canvas = canvas;
     this.map = new Map(canvas.width, canvas.height);
     this.player = new Player(canvas.width / 2, canvas.height / 2);
-    this.renderer = new Renderer(canvas);
+    this.renderer = new Renderer(canvas, (width, height) => this.updateMapSize(width, height));
     this.setupInput();
     this.spawnOnion();
     this.gameLoop();
+  }
+
+  updateMapSize(width: number, height: number) {
+    this.map.width = width;
+    this.map.height = height;
+    this.player.x = Math.min(this.player.x, this.map.width);
+    this.player.y = Math.min(this.player.y, this.map.height);
   }
 
   setupInput() {
@@ -57,13 +64,12 @@ export class Game {
   }
 
   render() {
-    const cameraX = this.player.x - this.canvas.width / 2;
-    const cameraY = this.player.y - this.canvas.height / 2;
+    const camera = this.renderer.getCamera(this.player.x, this.player.y, this.map.width, this.map.height);
 
     this.renderer.clear();
-    this.renderer.drawBackground(cameraX, cameraY);
-    this.renderer.drawPlayer();
-    this.onions.forEach(onion => this.renderer.drawOnion(onion, cameraX, cameraY));
+    this.renderer.drawBackground(camera.x, camera.y);
+    this.renderer.drawPlayer(this.player, camera.x, camera.y);
+    this.onions.forEach(onion => this.renderer.drawOnion(onion, camera.x, camera.y));
     this.renderer.drawScore(this.score);
   }
 
