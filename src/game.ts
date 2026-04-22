@@ -18,7 +18,7 @@ export class Game {
     this.player = new Player(canvas.width / 2, canvas.height / 2);
     this.renderer = new Renderer(canvas, (width, height) => this.updateMapSize(width, height));
     this.setupInput();
-    this.spawnOnion();
+    this.spawnOnion(5);
     this.gameLoop();
   }
 
@@ -27,6 +27,9 @@ export class Game {
     this.map.height = height;
     this.player.x = Math.min(this.player.x, this.map.width);
     this.player.y = Math.min(this.player.y, this.map.height);
+    // Respawn onions in the new map size
+    this.onions = [];
+    this.spawnOnion(5);
   }
 
   setupInput() {
@@ -42,10 +45,12 @@ export class Game {
     });
   }
 
-  spawnOnion() {
-    const x = Math.random() * this.map.width;
-    const y = Math.random() * this.map.height;
-    this.onions.push(new Onion(x, y));
+  spawnOnion(count = 1) {
+    for (let i = 0; i < count; i++) {
+      const x = Math.random() * this.map.width;
+      const y = Math.random() * this.map.height;
+      this.onions.push(new Onion(x, y));
+    }
   }
 
   update() {
@@ -58,7 +63,7 @@ export class Game {
       if (!onion.collected && Math.abs(this.player.x - onion.x) < 15 && Math.abs(this.player.y - onion.y) < 15) {
         onion.collected = true;
         this.score++;
-        setTimeout(() => this.spawnOnion(), 1000); // Spawn new after 1s
+        setTimeout(() => this.spawnOnion(1), 1000); // Spawn new after 1s
       }
     });
   }

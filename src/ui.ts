@@ -6,6 +6,7 @@ export class Renderer {
   ctx: CanvasRenderingContext2D;
   background: HTMLImageElement;
   playerImage: HTMLImageElement;
+  onionImage: HTMLImageElement;
   backgroundZoom = 1.25;
 
   constructor(canvas: HTMLCanvasElement, onBackgroundLoaded?: (width: number, height: number) => void) {
@@ -19,6 +20,9 @@ export class Renderer {
 
     this.playerImage = new Image();
     this.playerImage.src = '/player_filled.png';
+
+    this.onionImage = new Image();
+    this.onionImage.src = '/onion_crying.png';
   }
 
   clear() {
@@ -57,6 +61,12 @@ export class Renderer {
     this.ctx.translate(drawX, drawY + wobble);
     this.ctx.rotate(tilt);
 
+    // Add shadow
+    this.ctx.shadowColor = 'rgba(0, 0, 0, 1)';
+    this.ctx.shadowBlur = 4;
+    this.ctx.shadowOffsetX = 4;
+    this.ctx.shadowOffsetY = 0;
+
     if (this.playerImage.complete && this.playerImage.naturalWidth > 0) {
       this.ctx.drawImage(this.playerImage, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
     } else {
@@ -71,8 +81,24 @@ export class Renderer {
     if (!onion.collected) {
       const drawX = (onion.x - cameraX) * this.backgroundZoom;
       const drawY = (onion.y - cameraY) * this.backgroundZoom;
-      this.ctx.fillStyle = 'yellow';
-      this.ctx.fillRect(drawX - 5, drawY - 5, 10, 10);
+      const iconSize = 50;
+
+      this.ctx.save();
+
+      // Add shadow
+      this.ctx.shadowColor = 'rgba(0, 0, 0, 1)';
+      this.ctx.shadowBlur = 3;
+      this.ctx.shadowOffsetX = 4;
+      this.ctx.shadowOffsetY = 4;
+
+      if (this.onionImage.complete && this.onionImage.naturalWidth > 0) {
+        this.ctx.drawImage(this.onionImage, drawX - iconSize / 2, drawY - iconSize / 2, iconSize, iconSize);
+      } else {
+        this.ctx.fillStyle = 'yellow';
+        this.ctx.fillRect(drawX - 5, drawY - 5, 10, 10);
+      }
+
+      this.ctx.restore();
     }
   }
 
