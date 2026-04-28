@@ -1,7 +1,7 @@
 export class Player {
   x: number;
   y: number;
-  speed: number = 3;
+  speed: number = 2;
   moving: boolean = false;
 
   constructor(x: number, y: number) {

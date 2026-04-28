@@ -60,7 +60,7 @@ export class Game {
 
   update() {
     this.player.update(this.keys);
-    this.chef.update();
+    this.chef.update(this.score, this.player.x, this.player.y);
     // Keep player in bounds
     this.player.x = Math.max(0, Math.min(this.map.width, this.player.x));
     this.player.y = Math.max(0, Math.min(this.map.height, this.player.y));

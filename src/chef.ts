@@ -5,7 +5,7 @@ export class Chef {
   anchorY: number;
   targetX: number;
   targetY: number;
-  speed = 0.9;
+  speed = 5;
   nextTargetTime = 0;
   nextSpeechTime = 0;
   speechEndTime = 0;
@@ -31,12 +31,42 @@ export class Chef {
     this.nextSpeechTime = now + this.randomSpeechDelay();
   }
 
-  update() {
+  update(score: number, playerX: number, playerY: number) {
     const now = performance.now();
+    const playerDx = this.x - playerX;
+    const playerDy = this.y - playerY;
+    const playerDistance = Math.hypot(playerDx, playerDy);
+    const reached = playerDistance < 80;
+    const shouldRun = score >= 10 && reached;
 
-    if (now >= this.nextTargetTime) {
-      this.setRandomTarget();
-      this.nextTargetTime = now + this.randomTargetDelay();
+    if (shouldRun) {
+      const awayAngle = Math.atan2(playerDy, playerDx);
+      const runRadius = 90 + Math.random() * 40;
+      this.targetX = this.anchorX + Math.cos(awayAngle) * runRadius;
+      this.targetY = this.anchorY + Math.sin(awayAngle) * runRadius;
+      this.speed = 5;
+    } else {
+      if (this.speed !== 0.9) {
+        this.speed = 0.9;
+      }
+      if (now >= this.nextTargetTime) {
+        this.setRandomTarget();
+        this.nextTargetTime = now + this.randomTargetDelay();
+      }
+    }
+
+    if (reached) {
+      this.currentSpeech = 'Bring me 10 onions!';
+      this.speechEndTime = now + 2500;
+      this.nextSpeechTime = now + this.randomSpeechDelay();
+    } else {
+      if (!this.currentSpeech || now >= this.speechEndTime) {
+        if (now >= this.nextSpeechTime) {
+          this.currentSpeech = this.phrases[Math.floor(Math.random() * this.phrases.length)];
+          this.speechEndTime = now + 3000 + Math.random() * 2000;
+          this.nextSpeechTime = now + this.randomSpeechDelay();
+        }
+      }
     }
 
     const dx = this.targetX - this.x;
@@ -49,20 +79,10 @@ export class Chef {
       this.x += moveX;
       this.y += moveY;
     }
-
-    if (now >= this.nextSpeechTime) {
-      this.currentSpeech = this.phrases[Math.floor(Math.random() * this.phrases.length)];
-      this.speechEndTime = now + 3000 + Math.random() * 2000;
-      this.nextSpeechTime = now + this.randomSpeechDelay();
-    }
-
-    if (this.currentSpeech && now >= this.speechEndTime) {
-      this.currentSpeech = null;
-    }
   }
 
   private randomTargetDelay() {
-    return 100 + Math.random() * 100;
+    return 1500 + Math.random() * 2000;
   }
 
   private randomSpeechDelay() {
