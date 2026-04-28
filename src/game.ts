@@ -11,6 +11,8 @@ export class Game {
   score: number = 0;
   renderer: Renderer;
   keys: Set<string> = new Set();
+  showTenOnionPopup: boolean = false;
+  popupShown: boolean = false;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -63,6 +65,15 @@ export class Game {
       if (!onion.collected && Math.abs(this.player.x - onion.x) < 15 && Math.abs(this.player.y - onion.y) < 15) {
         onion.collected = true;
         this.score++;
+        // Check if 10 onions collected
+        if (this.score === 10 && !this.popupShown) {
+          this.showTenOnionPopup = true;
+          this.popupShown = true;
+          // Hide popup after 5 seconds
+          setTimeout(() => {
+            this.showTenOnionPopup = false;
+          }, 5000);
+        }
         setTimeout(() => this.spawnOnion(1), 1000); // Spawn new after 1s
       }
     });
@@ -76,6 +87,11 @@ export class Game {
     this.renderer.drawPlayer(this.player, camera.x, camera.y);
     this.onions.forEach(onion => this.renderer.drawOnion(onion, camera.x, camera.y));
     this.renderer.drawScore(this.score);
+    
+    if (this.showTenOnionPopup) {
+      const message = 'Nice! You collected 10 onions.\nNow bring these to the Pommes Chef\nto make onion rings.\nBut be careful not to loose them!';
+      this.renderer.drawPopup(message);
+    }
   }
 
   gameLoop = () => {

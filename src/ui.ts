@@ -19,8 +19,7 @@ export class Renderer {
     this.background.src = '/map_less_contrast.png';
 
     this.playerImage = new Image();
-    this.playerImage.src = '/player_filled.png';
-
+    this.playerImage.src = '/chef.png';
     this.onionImage = new Image();
     this.onionImage.src = '/onion_crying.png';
   }
@@ -68,7 +67,7 @@ export class Renderer {
     this.ctx.shadowOffsetY = 0;
 
     if (this.playerImage.complete && this.playerImage.naturalWidth > 0) {
-      this.ctx.drawImage(this.playerImage, -iconSize / 2, -iconSize / 2, iconSize, iconSize);
+      this.ctx.drawImage(this.playerImage, -iconSize, -iconSize, iconSize*2, iconSize*2);
     } else {
       this.ctx.fillStyle = 'blue';
       this.ctx.fillRect(-10, -10, 20, 20);
@@ -103,8 +102,41 @@ export class Renderer {
   }
 
   drawScore(score: number) {
-    this.ctx.fillStyle = 'black';
-    this.ctx.font = '20px Arial';
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = '30px Arial';
     this.ctx.fillText(`Onions collected: ${score}`, 10, 30);
+  }
+
+  drawPopup(message: string) {
+    // Semi-transparent overlay
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    // Popup box
+    const boxWidth = 500;
+    const boxHeight = 200;
+    const boxX = (this.canvas.width - boxWidth) / 2;
+    const boxY = (this.canvas.height - boxHeight) / 2;
+
+    this.ctx.fillStyle = 'rgba(50, 50, 50, 0.95)';
+    this.ctx.fillRect(boxX, boxY, boxWidth, boxHeight);
+
+    // Border
+    this.ctx.strokeStyle = 'white';
+    this.ctx.lineWidth = 3;
+    this.ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+
+    // Text
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = 'bold 20px Arial';
+    this.ctx.textAlign = 'center';
+    
+    const lines = message.split('\n');
+    const lineHeight = 30;
+    const startY = boxY + 50;
+    
+    lines.forEach((line, index) => {
+      this.ctx.fillText(line, this.canvas.width / 2, startY + index * lineHeight);
+    });
   }
 }
