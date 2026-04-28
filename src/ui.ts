@@ -7,6 +7,7 @@ export class Renderer {
   background: HTMLImageElement;
   playerImage: HTMLImageElement;
   onionImage: HTMLImageElement;
+  chefImage: HTMLImageElement;
   backgroundZoom = 1.25;
 
   constructor(canvas: HTMLCanvasElement, onBackgroundLoaded?: (width: number, height: number) => void) {
@@ -22,6 +23,8 @@ export class Renderer {
     this.playerImage.src = '/chef.png';
     this.onionImage = new Image();
     this.onionImage.src = '/onion_crying.png';
+    this.chefImage = new Image();
+    this.chefImage.src = '/pommes_chef.png';
   }
 
   clear() {
@@ -98,6 +101,68 @@ export class Renderer {
       }
 
       this.ctx.restore();
+    }
+  }
+
+  drawChef(chef: { x: number; y: number; currentSpeech: string | null }, cameraX: number, cameraY: number) {
+    const drawX = (chef.x - cameraX) * this.backgroundZoom;
+    const drawY = (chef.y - cameraY) * this.backgroundZoom;
+    const iconWidth = 70;
+    const iconHeight = 90;
+
+    this.ctx.save();
+    this.ctx.shadowColor = 'rgba(0, 0, 0, 1)';
+    this.ctx.shadowBlur = 3;
+    this.ctx.shadowOffsetX = 4;
+    this.ctx.shadowOffsetY = 4;
+
+    if (this.chefImage.complete && this.chefImage.naturalWidth > 0) {
+      this.ctx.drawImage(this.chefImage, drawX - iconWidth / 2, drawY - iconHeight / 2, iconWidth, iconHeight);
+    } else {
+      this.ctx.fillStyle = 'orange';
+      this.ctx.fillRect(drawX - 15, drawY - 30, 30, 40);
+    }
+
+    this.ctx.restore();
+
+    if (chef.currentSpeech) {
+      const lines = chef.currentSpeech.split('\n');
+      const bubbleWidth = 220;
+      const bubbleHeight = 30 + lines.length * 24;
+      const bubbleX = drawX - bubbleWidth / 2;
+      const bubbleY = drawY - iconHeight / 2 - bubbleHeight - 10;
+
+      this.ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+      this.ctx.strokeStyle = '#333';
+      this.ctx.lineWidth = 2;
+      const radius = 12;
+      this.ctx.beginPath();
+      this.ctx.moveTo(bubbleX + radius, bubbleY);
+      this.ctx.lineTo(bubbleX + bubbleWidth - radius, bubbleY);
+      this.ctx.quadraticCurveTo(bubbleX + bubbleWidth, bubbleY, bubbleX + bubbleWidth, bubbleY + radius);
+      this.ctx.lineTo(bubbleX + bubbleWidth, bubbleY + bubbleHeight - radius);
+      this.ctx.quadraticCurveTo(bubbleX + bubbleWidth, bubbleY + bubbleHeight, bubbleX + bubbleWidth - radius, bubbleY + bubbleHeight);
+      this.ctx.lineTo(bubbleX + radius, bubbleY + bubbleHeight);
+      this.ctx.quadraticCurveTo(bubbleX, bubbleY + bubbleHeight, bubbleX, bubbleY + bubbleHeight - radius);
+      this.ctx.lineTo(bubbleX, bubbleY + radius);
+      this.ctx.quadraticCurveTo(bubbleX, bubbleY, bubbleX + radius, bubbleY);
+      this.ctx.closePath();
+      this.ctx.fill();
+      this.ctx.stroke();
+
+      this.ctx.fillStyle = '#222';
+      this.ctx.font = '16px Arial';
+      this.ctx.textAlign = 'center';
+      this.ctx.textBaseline = 'middle';
+      lines.forEach((line, index) => {
+        this.ctx.fillText(line, drawX, bubbleY + 20 + index * 24);
+      });
+
+      this.ctx.beginPath();
+      this.ctx.moveTo(drawX - 10, bubbleY + bubbleHeight);
+      this.ctx.lineTo(drawX + 5, bubbleY + bubbleHeight + 15);
+      this.ctx.lineTo(drawX + 20, bubbleY + bubbleHeight);
+      this.ctx.fill();
     }
   }
 

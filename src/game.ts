@@ -1,6 +1,7 @@
 import { Player } from './player';
 import { Map } from './map';
 import { Onion } from './onion';
+import { Chef } from './chef';
 import { Renderer } from './ui';
 
 export class Game {
@@ -8,6 +9,7 @@ export class Game {
   player: Player;
   map: Map;
   onions: Onion[] = [];
+  chef: Chef;
   score: number = 0;
   renderer: Renderer;
   keys: Set<string> = new Set();
@@ -18,6 +20,7 @@ export class Game {
     this.canvas = canvas;
     this.map = new Map(canvas.width, canvas.height);
     this.player = new Player(canvas.width / 2, canvas.height / 2);
+    this.chef = new Chef(240, 650);
     this.renderer = new Renderer(canvas, (width, height) => this.updateMapSize(width, height));
     this.setupInput();
     this.spawnOnion(5);
@@ -57,6 +60,7 @@ export class Game {
 
   update() {
     this.player.update(this.keys);
+    this.chef.update();
     // Keep player in bounds
     this.player.x = Math.max(0, Math.min(this.map.width, this.player.x));
     this.player.y = Math.max(0, Math.min(this.map.height, this.player.y));
@@ -86,6 +90,7 @@ export class Game {
     this.renderer.drawBackground(camera.x, camera.y);
     this.renderer.drawPlayer(this.player, camera.x, camera.y);
     this.onions.forEach(onion => this.renderer.drawOnion(onion, camera.x, camera.y));
+    this.renderer.drawChef(this.chef, camera.x, camera.y);
     this.renderer.drawScore(this.score);
     
     if (this.showTenOnionPopup) {
